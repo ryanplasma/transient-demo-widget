@@ -32,12 +32,23 @@ class Transient_Demo_Widget extends WP_Widget {
    * @param array $instance
    */
   public function widget( $args, $instance ) {
+    $url = "https://api.github.com/users/ryanplasma/repos";
+    $response = wp_remote_get( $url );
+    $body = wp_remote_retrieve_body( $response );
+    $repos = json_decode( $body );
+
     $output = '';
     $output .= '<h1>Github Repos</h1>';
     $output .= '<ul>';
-    $output .= '<li><a href=#>Repo 1</a></li>';
-    $output .= '<li><a href=#>Repo 2</a></li>';
-    $output .= '<li><a href=#>Repo 3</a></li>';
+
+    foreach ($repos as $repo) {
+      $output .= '<li>';
+      $output .= '<a href=' . $repo->html_url . '>';
+      $output .= $repo->name;
+      $output .= '</a>';
+      $output .= '</li>';
+    }
+
     $output .= '</ul>';
 
     echo $output;
