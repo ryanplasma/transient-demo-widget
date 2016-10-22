@@ -32,10 +32,18 @@ class Transient_Demo_Widget extends WP_Widget {
    * @param array $instance
    */
   public function widget( $args, $instance ) {
-    $url = "https://api.github.com/users/ryanplasma/repos";
-    $response = wp_remote_get( $url );
-    $body = wp_remote_retrieve_body( $response );
-    $repos = json_decode( $body );
+    $time1 = microtime();
+
+    if ( false === ($repos = get_transient( 'github_repos' ))) {
+      $url = "https://api.github.com/users/ryanplasma/repos";
+      $response = wp_remote_get( $url );
+      $body = wp_remote_retrieve_body( $response );
+      $repos = json_decode( $body );
+
+      set_transient( 'github_repos', $repos, DAY_IN_SECONDS);
+    }
+
+    $time2 = microtime();
 
     $output = '';
     $output .= '<h1>Github Repos</h1>';
@@ -50,6 +58,9 @@ class Transient_Demo_Widget extends WP_Widget {
     }
 
     $output .= '</ul>';
+
+    $benchmark = $time2 - $time1;
+    $output .= '<p>Time: ' . $benchmark . ' seconds';
 
     echo $output;
   }
